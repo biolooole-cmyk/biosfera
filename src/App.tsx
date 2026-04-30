@@ -512,33 +512,43 @@ export default function App() {
                     <span className="text-xs font-black text-gray-300">Питання {qIdx + 1} з {questions.length}</span>
                 </div>
 
-                <h2 className="text-3xl font-black mb-12 leading-tight tracking-tight text-gray-900">{question.text}</h2>
-                
-                <div className="space-y-4">
-                    {question.options.map((opt, i) => (
-                        <button 
-                            key={i} disabled={selected !== null} onClick={() => handleAnswer(i)}
-                            className={cn(
-                                "w-full p-6 text-left rounded-[2.5rem] border-2 font-bold text-lg transition-all flex items-center justify-between group",
-                                selected === null ? "bg-gray-50 border-gray-50 hover:border-emerald-500 hover:bg-emerald-50 text-gray-700" : 
-                                i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-xl" : 
-                                i === selected ? "bg-red-500 border-red-500 text-white" : "bg-gray-50 border-gray-50 opacity-40 text-gray-400"
-                            )}
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className={cn(
-                                    "w-10 h-10 rounded-2xl flex items-center justify-center font-black transition-colors",
-                                    selected === null ? "bg-white text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white" : "bg-white/20 text-white"
-                                )}>
-                                    {['A', 'B', 'C', 'D'][i]}
-                                </div>
-                                <span className="flex-1">{opt}</span>
-                            </div>
-                            {selected !== null && i === question.correct && <CheckCircle2 size={24} className="shrink-0" />}
-                            {selected !== null && i === selected && i !== question.correct && <AlertCircle size={24} className="shrink-0" />}
-                        </button>
-                    ))}
-                </div>
+                <AnimatePresence mode="wait">
+                    <motion.div 
+                        key={qIdx}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <h2 className="text-3xl font-black mb-12 leading-tight tracking-tight text-gray-900">{question.text}</h2>
+                        
+                        <div className="space-y-4">
+                            {question.options.map((opt, i) => (
+                                <button 
+                                    key={i} disabled={selected !== null} onClick={() => handleAnswer(i)}
+                                    className={cn(
+                                        "w-full p-6 text-left rounded-[2.5rem] border-2 font-bold text-lg transition-all flex items-center justify-between group",
+                                        selected === null ? "bg-gray-50 border-gray-50 hover:border-emerald-500 hover:bg-emerald-50 text-gray-700" : 
+                                        i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-xl" : 
+                                        i === selected ? "bg-red-500 border-red-500 text-white" : "bg-gray-50 border-gray-50 opacity-40 text-gray-400"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className={cn(
+                                            "w-10 h-10 rounded-2xl flex items-center justify-center font-black transition-colors",
+                                            selected === null ? "bg-white text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white" : "bg-white/20 text-white"
+                                        )}>
+                                            {['A', 'B', 'C', 'D'][i]}
+                                        </div>
+                                        <span className="flex-1">{opt}</span>
+                                    </div>
+                                    {selected !== null && i === question.correct && <CheckCircle2 size={24} className="shrink-0" />}
+                                    {selected !== null && i === selected && i !== question.correct && <AlertCircle size={24} className="shrink-0" />}
+                                </button>
+                            ))}
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
 
                 <AnimatePresence>
                     {selected !== null && (
@@ -643,31 +653,41 @@ export default function App() {
                </div>
             </div>
 
-            <h2 className="text-4xl font-bold mb-16 text-gray-900 tracking-tight leading-[1.1]">{question.text}</h2>
+            <AnimatePresence mode="wait">
+                <motion.div 
+                    key={currentQuestion}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <h2 className="text-4xl font-bold mb-16 text-gray-900 tracking-tight leading-[1.1]">{question.text}</h2>
 
-            <div className="space-y-4">
-               {question.options.map((opt, i) => (
-                 <button 
-                    key={i} disabled={selected !== null} onClick={() => handleAnswer(i)}
-                    className={cn(
-                      "w-full p-8 text-left rounded-[2.5rem] border-2 font-bold text-xl transition-all flex items-center group relative overflow-hidden",
-                      selected === null ? "bg-gray-50 border-gray-50 hover:border-emerald-500 hover:bg-emerald-50 text-gray-700" : 
-                      i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-2xl" : 
-                      i === selected ? "bg-red-500 border-red-500 text-white shadow-xl" : "bg-gray-50 border-gray-50 opacity-40 text-gray-400"
-                    )}
-                 >
-                    <div className={cn(
-                      "w-12 h-12 rounded-2xl flex items-center justify-center mr-6 font-black text-xl transition-colors",
-                      selected === null ? "bg-white text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white" : "bg-white/20 text-white"
-                    )}>
-                       {['A', 'B', 'C', 'D'][i]}
+                    <div className="space-y-4">
+                    {question.options.map((opt, i) => (
+                        <button 
+                            key={i} disabled={selected !== null} onClick={() => handleAnswer(i)}
+                            className={cn(
+                            "w-full p-8 text-left rounded-[2.5rem] border-2 font-bold text-xl transition-all flex items-center group relative overflow-hidden",
+                            selected === null ? "bg-gray-50 border-gray-50 hover:border-emerald-500 hover:bg-emerald-50 text-gray-700" : 
+                            i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-2xl" : 
+                            i === selected ? "bg-red-500 border-red-500 text-white shadow-xl" : "bg-gray-50 border-gray-50 opacity-40 text-gray-400"
+                            )}
+                        >
+                            <div className={cn(
+                            "w-12 h-12 rounded-2xl flex items-center justify-center mr-6 font-black text-xl transition-colors",
+                            selected === null ? "bg-white text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white" : "bg-white/20 text-white"
+                            )}>
+                            {['A', 'B', 'C', 'D'][i]}
+                            </div>
+                            <span className="flex-1">{opt}</span>
+                            {selected !== null && i === question.correct && <CheckCircle2 className="ml-auto text-white" size={32} />}
+                            {selected !== null && i === selected && i !== question.correct && <AlertCircle className="ml-auto text-white" size={32} />}
+                        </button>
+                    ))}
                     </div>
-                    <span className="flex-1">{opt}</span>
-                    {selected !== null && i === question.correct && <CheckCircle2 className="ml-auto text-white" size={32} />}
-                    {selected !== null && i === selected && i !== question.correct && <AlertCircle className="ml-auto text-white" size={32} />}
-                 </button>
-               ))}
-            </div>
+                </motion.div>
+            </AnimatePresence>
 
             <AnimatePresence>
                {selected !== null && (
@@ -748,31 +768,39 @@ export default function App() {
          <div className="lg:col-span-8">
             <div className="bg-white p-12 rounded-[5rem] shadow-sm border border-gray-100 min-h-[650px] flex flex-col justify-center relative overflow-hidden">
                <div className="absolute top-0 right-0 p-12 opacity-5 font-black text-[15rem] leading-none select-none">Q</div>
-               <div className="relative z-10 px-4">
-                  <div className="flex items-center gap-4 mb-10">
-                    <span className="bg-amber-100 text-amber-700 font-black text-xs uppercase px-5 py-2 rounded-full border border-amber-200 tracking-widest">Питання 0{currentIdx + 1}</span>
-                    <span className="text-emerald-400 font-bold uppercase text-[10px] tracking-[0.3em]">На кону: {moneyScale[currentIdx]} XP</span>
-                  </div>
-                  <h2 className="text-5xl font-black text-gray-900 mb-20 leading-tight tracking-tighter">{question.text}</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {question.options.map((opt, i) => (
-                      <button 
-                        key={i} onClick={() => handleAnswer(i)} disabled={selected !== null}
-                        className={cn(
-                          "p-10 text-left border-3 rounded-[2.5rem] font-bold text-xl transition-all relative group flex items-center min-h-[120px]",
-                          selected === null ? "bg-gray-50 border-gray-50 hover:border-emerald-500 hover:bg-emerald-50 text-gray-600" : 
-                          i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-2xl z-10" :
-                          i === selected ? "bg-red-500 border-red-500 text-white z-10" : "bg-gray-50 border-gray-50 opacity-10"
-                        )}
-                      >
-                         <span className="text-3xl font-black mr-8 opacity-20">{['A', 'B', 'C', 'D'][i]}</span>
-                         <span className="flex-1">{opt}</span>
-                         {selected !== null && i === question.correct && <CheckCircle2 className="text-white ml-4 animate-bounce" size={32} />}
-                         {selected !== null && i === selected && i !== question.correct && <AlertCircle className="text-white ml-4" size={32} />}
-                      </button>
-                    ))}
-                  </div>
-               </div>
+               <AnimatePresence mode="wait">
+                  <motion.div 
+                    key={currentIdx}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="relative z-10 px-4"
+                  >
+                     <div className="flex items-center gap-4 mb-10">
+                        <span className="bg-amber-100 text-amber-700 font-black text-xs uppercase px-5 py-2 rounded-full border border-amber-200 tracking-widest">Питання 0{currentIdx + 1}</span>
+                        <span className="text-emerald-400 font-bold uppercase text-[10px] tracking-[0.3em]">На кону: {moneyScale[currentIdx]} XP</span>
+                     </div>
+                     <h2 className="text-5xl font-black text-gray-900 mb-20 leading-tight tracking-tighter">{question.text}</h2>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {question.options.map((opt, i) => (
+                        <button 
+                           key={i} onClick={() => handleAnswer(i)} disabled={selected !== null}
+                           className={cn(
+                              "p-10 text-left border-3 rounded-[2.5rem] font-bold text-xl transition-all relative group flex items-center min-h-[120px]",
+                              selected === null ? "bg-gray-50 border-gray-50 hover:border-emerald-500 hover:bg-emerald-50 text-gray-600" : 
+                              i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-2xl z-10" :
+                              i === selected ? "bg-red-500 border-red-500 text-white z-10" : "bg-gray-50 border-gray-50 opacity-10"
+                           )}
+                        >
+                           <span className="text-3xl font-black mr-8 opacity-20">{['A', 'B', 'C', 'D'][i]}</span>
+                           <span className="flex-1">{opt}</span>
+                           {selected !== null && i === question.correct && <CheckCircle2 className="text-white ml-4 animate-bounce" size={32} />}
+                           {selected !== null && i === selected && i !== question.correct && <AlertCircle className="text-white ml-4" size={32} />}
+                        </button>
+                        ))}
+                     </div>
+                  </motion.div>
+               </AnimatePresence>
             </div>
          </div>
          <div className="lg:col-span-4 self-stretch">
