@@ -70,9 +70,29 @@ export default function App() {
     });
   };
 
+  useEffect(() => {
+    const data = { xp, completedModules };
+    localStorage.setItem('biosphere-pro-progress', JSON.stringify(data));
+  }, [xp, completedModules]);
+
+  const resetProgress = () => {
+    if (confirm('Ви впевнені, що хочете очистити весь прогрес?')) {
+      setXp(0);
+      setLevel(1);
+      setCompletedModules([]);
+      localStorage.removeItem('biosphere-pro-progress');
+      nextScreen('home');
+    }
+  };
+
   const nextScreen = (to: Screen) => {
     setScreen(to as any);
     window.scrollTo(0, 0);
+    // Reset temporary states when navigating
+    if (to === 'quiz') {
+      setQuizResults([]);
+      setQuizScore(0);
+    }
   };
 
   // --- Visuals Helper ---
@@ -830,8 +850,26 @@ export default function App() {
 
   const ResultAnalysisScreen = () => {
     const accuracy = Math.round((quizScore / QUIZ_QUESTIONS.length) * 100);
-    const strengths = quizResults.filter(r => r).length >= 3 ? ['Розуміння функцій біосфери', 'Знання геосфер планети'] : ['Базові поняття'];
-    const weaknesses = quizResults.filter(r => !r).length > 0 ? ['Класифікація речовин за Вернадським', 'Ноосферна етика'] : [];
+    
+    // Improved logic for strengths and weaknesses based on actual results
+    const strengths = QUIZ_QUESTIONS
+      .filter((_, i) => quizResults[i])
+      .map(q => THEORY_CONTENT.find(m => m.id === q.moduleId)?.title)
+      .filter((v, i, a) => a && a.indexOf(v) === i)
+      .slice(0, 2) as string[];
+
+    const weaknesses = QUIZ_QUESTIONS
+      .filter((_, i) => quizResults[i] === false)
+      .map(q => THEORY_CONTENT.find(m => m.id === q.moduleId)?.title)
+      .filter((v, i, a) => a && a.indexOf(v) === i)
+      .slice(0, 2) as string[];
+
+    if (strengths.length === 0) strengths.push('Початковий рівень');
+
+    const suggestedModuleIndex = QUIZ_QUESTIONS.findIndex((_, i) => quizResults[i] === false);
+    const suggestedModule = suggestedModuleIndex !== -1 
+      ? THEORY_CONTENT.find(m => m.id === QUIZ_QUESTIONS[suggestedModuleIndex].moduleId) 
+      : THEORY_CONTENT[0];
 
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -876,15 +914,15 @@ export default function App() {
                    <div className="flex gap-8 items-center text-left">
                       <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center text-3xl shadow-sm shrink-0">📚</div>
                       <div>
-                         <p className="font-black text-lg">Повторити Модуль 0{weaknesses.length > 0 ? 3 : 1}</p>
-                         <p className="text-gray-400 text-sm">Приділіть увагу причинно-наслідковим зв'язкам утворення біокосних речовин.</p>
+                         <p className="font-black text-lg">Повторити: {suggestedModule?.title}</p>
+                         <p className="text-gray-400 text-sm">Зверніть увагу на {suggestedModule?.accentTitle.toLowerCase()}.</p>
                       </div>
                    </div>
                    <div className="flex gap-8 items-center text-left">
                       <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center text-3xl shadow-sm shrink-0">🔬</div>
                       <div>
-                         <p className="font-black text-lg">Занурення у "Функції життя"</p>
-                         <p className="text-gray-400 text-sm">Перегляньте газуву функцію. Це база для розуміння клімату.</p>
+                         <p className="font-black text-lg">Практика в лабораторії</p>
+                         <p className="text-gray-400 text-sm">Спробуйте ще раз пройти симуляцію "Межі біосфери", щоб закріпити просторове уявлення.</p>
                       </div>
                    </div>
                 </div>
@@ -1178,8 +1216,8 @@ export default function App() {
           <span className="hidden sm:inline">ДАТА: {new Date().toLocaleDateString()}</span>
         </div>
         <div className="flex space-x-10">
-          <button className="hover:text-emerald-500 transition-colors">Методичні вказівки</button>
-          <button className="hover:text-emerald-500 transition-colors">Експорт результатів</button>
+          <button className="hover:text-emerald-500 transition-colors cursor-help">Методичні вказівки</button>
+          <button onClick={resetProgress} className="hover:text-red-500 transition-colors">Очистити прогрес</button>
         </div>
       </footer>
     </div>
