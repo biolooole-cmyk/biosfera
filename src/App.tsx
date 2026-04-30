@@ -436,34 +436,65 @@ export default function App() {
         setDone(true);
         if (!completedModules.includes(moduleId)) {
             setCompletedModules(prev => [...prev, moduleId]);
+            addXp(50); // Bonus for completing a module
         }
       }
     };
 
     if (done) {
+        const isLastModule = currentTheory === THEORY_CONTENT.length - 1;
         return (
-            <div className="max-w-3xl mx-auto py-20 text-center bg-white rounded-[5rem] p-16 shadow-sm border border-gray-100">
-                <div className="w-32 h-32 bg-emerald-500 rounded-[2.5rem] flex items-center justify-center text-white mx-auto mb-10 shadow-xl">
-                    <Trophy size={64} />
+            <div className="max-w-4xl mx-auto py-20 text-center bg-white rounded-[5rem] p-16 shadow-sm border border-gray-100 flex flex-col items-center">
+                <motion.div 
+                    initial={{ scale: 0 }} animate={{ scale: 1, rotate: [0, 10, -10, 0] }}
+                    className="w-40 h-40 bg-emerald-500 rounded-[3rem] flex items-center justify-center text-white mb-12 shadow-2xl relative"
+                >
+                    <Trophy size={80} />
+                    <motion.div 
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                        className="absolute inset-0 bg-emerald-400 rounded-full -z-10 blur-2xl"
+                    />
+                </motion.div>
+                
+                <h2 className="text-6xl font-black mb-4 tracking-tighter leading-none">МОДУЛЬ ЗАСВОЄНО!</h2>
+                <p className="text-gray-400 text-xl mb-12 font-medium max-w-lg">
+                    Ви успішно пройшли 0{currentTheory + 1}-ий етап. Ранг знань підвищено.
+                </p>
+
+                <div className="flex gap-8 mb-16">
+                    <div className="text-center">
+                        <div className="text-3xl font-black text-emerald-600">{localScore}/{questions.length}</div>
+                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Вірних відповідей</div>
+                    </div>
+                    <div className="w-px h-10 bg-gray-100 self-center" />
+                    <div className="text-center">
+                        <div className="text-3xl font-black text-amber-500">+{localScore * 20 + 50}</div>
+                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Набрано XP</div>
+                    </div>
                 </div>
-                <h2 className="text-5xl font-black mb-4 tracking-tighter">МОДУЛЬ ЗАСВОЄНО!</h2>
-                <p className="text-gray-400 text-xl mb-12 font-medium">Ваш результат: {localScore} з {questions.length} вірних відповідей.</p>
-                <div className="flex gap-4 justify-center">
-                    {currentTheory < THEORY_CONTENT.length - 1 ? (
+
+                <div className="flex flex-col md:flex-row gap-4 w-full justify-center">
+                    {!isLastModule ? (
                         <button 
                             onClick={() => { setCurrentTheory(prev => prev + 1); nextScreen('theory'); }}
-                            className="bg-black text-white px-16 py-6 rounded-3xl font-black text-xl hover:bg-emerald-600 transition-all shadow-2xl active:scale-95"
+                            className="bg-black text-white px-16 py-6 rounded-3xl font-black text-xl hover:bg-emerald-600 transition-all shadow-2xl active:scale-95 flex items-center gap-4"
                         >
-                            НАСТУПНИЙ МОДУЛЬ <ArrowRight size={24} className="inline ml-2" />
+                            НАСТУПНИЙ МОДУЛЬ <ArrowRight size={24} />
                         </button>
                     ) : (
                         <button 
-                            onClick={() => nextScreen('layers')}
-                            className="bg-emerald-600 text-white px-16 py-6 rounded-3xl font-black text-xl hover:bg-black transition-all shadow-2xl active:scale-95"
+                            onClick={() => nextScreen('quiz')}
+                            className="bg-emerald-600 text-white px-16 py-6 rounded-3xl font-black text-xl hover:bg-black transition-all shadow-2xl active:scale-95 flex items-center gap-4"
                         >
-                            ДО ПРАКТИКИ <ArrowRight size={24} className="inline ml-2" />
+                            ФІНАЛЬНИЙ ЕКЗАМЕН <Target size={24} />
                         </button>
                     )}
+                    <button 
+                        onClick={() => nextScreen('home')}
+                        className="px-10 py-6 rounded-3xl font-bold text-gray-400 hover:text-gray-900 transition-colors"
+                    >
+                        На головну
+                    </button>
                 </div>
             </div>
         );
@@ -474,34 +505,60 @@ export default function App() {
     return (
         <div className="max-w-3xl mx-auto px-4 py-8">
             <div className="bg-white p-16 rounded-[4rem] shadow-sm border border-gray-100 relative overflow-hidden">
+                <div className="absolute top-0 left-0 h-1 bg-emerald-500 transition-all duration-500" style={{ width: `${((qIdx + 1) / questions.length) * 100}%` }} />
+                
                 <div className="flex justify-between items-center mb-10">
-                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">ЕКЗАМЕН МОДУЛЯ 0{currentTheory + 1}</span>
-                    <span className="text-xs font-black text-gray-300">{qIdx + 1} / {questions.length}</span>
+                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest px-4 py-2 bg-emerald-50 rounded-xl">ЕКЗАМЕН МОДУЛЯ 0{currentTheory + 1}</span>
+                    <span className="text-xs font-black text-gray-300">Питання {qIdx + 1} з {questions.length}</span>
                 </div>
-                <h2 className="text-3xl font-black mb-12 leading-tight tracking-tight">{question.text}</h2>
+
+                <h2 className="text-3xl font-black mb-12 leading-tight tracking-tight text-gray-900">{question.text}</h2>
+                
                 <div className="space-y-4">
                     {question.options.map((opt, i) => (
                         <button 
                             key={i} disabled={selected !== null} onClick={() => handleAnswer(i)}
                             className={cn(
-                                "w-full p-6 text-left rounded-3xl border-2 font-bold text-lg transition-all",
+                                "w-full p-6 text-left rounded-[2.5rem] border-2 font-bold text-lg transition-all flex items-center justify-between group",
                                 selected === null ? "bg-gray-50 border-gray-50 hover:border-emerald-500 hover:bg-emerald-50 text-gray-700" : 
                                 i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-xl" : 
                                 i === selected ? "bg-red-500 border-red-500 text-white" : "bg-gray-50 border-gray-50 opacity-40 text-gray-400"
                             )}
                         >
-                            {opt}
+                            <div className="flex items-center gap-4">
+                                <div className={cn(
+                                    "w-10 h-10 rounded-2xl flex items-center justify-center font-black transition-colors",
+                                    selected === null ? "bg-white text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white" : "bg-white/20 text-white"
+                                )}>
+                                    {['A', 'B', 'C', 'D'][i]}
+                                </div>
+                                <span className="flex-1">{opt}</span>
+                            </div>
+                            {selected !== null && i === question.correct && <CheckCircle2 size={24} className="shrink-0" />}
+                            {selected !== null && i === selected && i !== question.correct && <AlertCircle size={24} className="shrink-0" />}
                         </button>
                     ))}
                 </div>
+
                 <AnimatePresence>
                     {selected !== null && (
-                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-12 pt-8 border-t border-gray-50 text-center">
-                            <p className={cn("text-lg font-bold mb-8", selected === question.correct ? "text-emerald-600" : "text-red-500")}>
-                                {selected === question.correct ? (typeof question.explanation === 'object' ? question.explanation.correct : question.explanation) : (typeof question.explanation === 'object' ? question.explanation.incorrect : question.explanation)}
-                            </p>
-                            <button onClick={next} className="bg-black text-white px-16 py-5 rounded-2xl font-black hover:bg-emerald-950 transition-all shadow-xl active:scale-95">
-                                {qIdx === questions.length - 1 ? 'ЗАКІНЧИТИ' : 'НАСТУПНЕ ПИТАННЯ'}
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-12 pt-8 border-t border-gray-100">
+                             <div className={cn(
+                               "p-8 rounded-[3rem] border-2 mb-10 transition-colors",
+                               selected === question.correct ? "bg-emerald-50 border-emerald-100 text-emerald-900" : "bg-red-50 border-red-100 text-red-900"
+                             )}>
+                                <div className="flex items-center gap-3 mb-4">
+                                   <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white", selected === question.correct ? "bg-emerald-500" : "bg-red-500")}>
+                                      {selected === question.correct ? <CheckCircle2 size={22} /> : <AlertCircle size={22} />}
+                                   </div>
+                                   <span className="font-black uppercase tracking-widest text-[10px]">{selected === question.correct ? 'Чудово!' : 'Майже...'}</span>
+                                </div>
+                                <p className="text-lg font-medium leading-relaxed italic">
+                                    {selected === question.correct ? (typeof question.explanation === 'object' ? question.explanation.correct : question.explanation) : (typeof question.explanation === 'object' ? question.explanation.incorrect : question.explanation)}
+                                </p>
+                             </div>
+                            <button onClick={next} className="w-full bg-black text-white px-16 py-6 rounded-3xl font-black text-lg hover:bg-emerald-950 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3">
+                                {qIdx === questions.length - 1 ? 'ЗАКІНЧИТИ ТЕСТ' : 'НАСТУПНЕ ПИТАННЯ'} <ArrowRight size={22} />
                             </button>
                         </motion.div>
                     )}
@@ -539,14 +596,15 @@ export default function App() {
 
     if (isComplete) {
       return (
-        <div className="max-w-4xl mx-auto py-20 text-center bg-white rounded-[5rem] p-16 shadow-sm border border-gray-100">
-           <div className="w-40 h-40 bg-emerald-500 rounded-[3rem] flex items-center justify-center text-white mx-auto mb-12 shadow-2xl shadow-emerald-200">
+        <div className="max-w-4xl mx-auto py-20 text-center bg-white rounded-[5rem] p-16 shadow-sm border border-gray-100 flex flex-col items-center">
+           <div className="w-40 h-40 bg-emerald-500 rounded-[3rem] flex items-center justify-center text-white mb-12 shadow-2xl relative">
               <Trophy size={100} />
+              <div className="absolute inset-0 bg-emerald-400 rounded-full -z-10 blur-3xl opacity-30 animate-pulse" />
            </div>
-           <h2 className="text-6xl font-black mb-4 tracking-tighter text-gray-900">ДИПЛОМ ОФОРМЛЕНО!</h2>
+           <h2 className="text-6xl font-black mb-4 tracking-tighter text-gray-900 uppercase">ДИПЛОМ ОФОРМЛЕНО!</h2>
            <p className="text-gray-400 text-xl mb-16 font-medium max-w-lg mx-auto leading-relaxed">Ваші знання біосфери пройшли перевірку. Ви готові до епохи Розуму.</p>
 
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 max-w-2xl mx-auto">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 max-w-2xl mx-auto w-full">
               <div className="bg-gray-50 p-10 rounded-[3rem] border border-gray-100">
                  <div className="text-5xl font-black text-emerald-600 mb-2">{quizScore}</div>
                  <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Бали</div>
@@ -558,14 +616,14 @@ export default function App() {
               </div>
            </div>
 
-           <div className="flex flex-col items-center gap-6">
+           <div className="flex flex-col items-center gap-6 w-full">
               <button 
                 onClick={() => nextScreen('millionaire')}
-                className="bg-indigo-900 text-white px-20 py-6 rounded-3xl font-black text-xl shadow-2xl hover:bg-emerald-950 transition-all flex items-center gap-4 active:scale-95"
+                className="bg-indigo-900 text-white px-20 py-7 rounded-[2.5rem] font-black text-xl shadow-2xl hover:bg-emerald-950 transition-all flex items-center gap-4 active:scale-95"
               >
                 <Zap size={28} className="text-amber-400" /> ГРА: ЕКО-МІЛЬЙОНЕР
               </button>
-              <button onClick={() => nextScreen('results')} className="text-gray-400 font-black uppercase text-xs tracking-widest hover:text-emerald-600 transition-colors">Переглянути аналіз</button>
+              <button onClick={() => nextScreen('results')} className="text-gray-400 font-black uppercase text-[10px] tracking-widest hover:text-emerald-600 transition-colors">Переглянути аналіз помилок</button>
            </div>
         </div>
       );
@@ -573,12 +631,14 @@ export default function App() {
 
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
-         <div className="bg-white p-16 rounded-[5rem] shadow-sm border border-gray-100 relative">
+         <div className="bg-white p-16 rounded-[4rem] shadow-sm border border-gray-100 relative overflow-hidden">
+            <div className="absolute top-0 left-0 h-1 bg-emerald-500 transition-all duration-500" style={{ width: `${((currentQuestion + 1) / QUIZ_QUESTIONS.length) * 100}%` }} />
+            
             <div className="flex justify-between items-center mb-12">
                <span className="bg-emerald-50 text-emerald-700 px-6 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest">Питання 0{currentQuestion + 1}</span>
                <div className="flex gap-2">
                  {QUIZ_QUESTIONS.map((_, i) => (
-                   <div key={i} className={cn("w-3 h-3 rounded-full transition-all duration-500", i === currentQuestion ? "bg-emerald-500 scale-150" : i < currentQuestion ? "bg-emerald-200" : "bg-gray-100")} />
+                   <div key={i} className={cn("w-2.5 h-2.5 rounded-full transition-all duration-500", i === currentQuestion ? "bg-emerald-500 scale-125" : i < currentQuestion ? "bg-emerald-200" : "bg-gray-100")} />
                  ))}
                </div>
             </div>
@@ -592,18 +652,19 @@ export default function App() {
                     className={cn(
                       "w-full p-8 text-left rounded-[2.5rem] border-2 font-bold text-xl transition-all flex items-center group relative overflow-hidden",
                       selected === null ? "bg-gray-50 border-gray-50 hover:border-emerald-500 hover:bg-emerald-50 text-gray-700" : 
-                      i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-2xl shadow-emerald-100" : 
-                      i === selected ? "bg-red-500 border-red-500 text-white" : "bg-gray-50 border-gray-50 opacity-40"
+                      i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-2xl" : 
+                      i === selected ? "bg-red-500 border-red-500 text-white shadow-xl" : "bg-gray-50 border-gray-50 opacity-40 text-gray-400"
                     )}
                  >
                     <div className={cn(
                       "w-12 h-12 rounded-2xl flex items-center justify-center mr-6 font-black text-xl transition-colors",
-                      selected === null ? "bg-white text-gray-300 group-hover:bg-emerald-500 group-hover:text-white" : "bg-white/20 text-white"
+                      selected === null ? "bg-white text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white" : "bg-white/20 text-white"
                     )}>
                        {['A', 'B', 'C', 'D'][i]}
                     </div>
-                    {opt}
+                    <span className="flex-1">{opt}</span>
                     {selected !== null && i === question.correct && <CheckCircle2 className="ml-auto text-white" size={32} />}
+                    {selected !== null && i === selected && i !== question.correct && <AlertCircle className="ml-auto text-white" size={32} />}
                  </button>
                ))}
             </div>
@@ -619,14 +680,14 @@ export default function App() {
                           <div className={cn("w-12 h-12 rounded-full flex items-center justify-center text-white", selected === question.correct ? "bg-emerald-500" : "bg-red-500")}>
                              {selected === question.correct ? <CheckCircle2 size={28} /> : <AlertCircle size={28} />}
                           </div>
-                          <span className="font-black uppercase tracking-[0.2em] text-xs">Пояснення результату</span>
+                          <span className="font-black uppercase tracking-[0.2em] text-xs">Коментар експерта</span>
                        </div>
                        <p className="text-xl font-medium leading-relaxed italic">
                           {selected === question.correct ? (typeof question.explanation === 'object' ? question.explanation.correct : question.explanation) : (typeof question.explanation === 'object' ? question.explanation.incorrect : question.explanation)}
                        </p>
                     </div>
                     <button onClick={next} className="w-full bg-black text-white py-8 rounded-[2.5rem] font-black text-xl shadow-2xl hover:bg-emerald-950 transition-all active:scale-95 flex items-center justify-center gap-4">
-                       {currentQuestion === QUIZ_QUESTIONS.length - 1 ? 'ФІНІШ' : 'ДАЛІ'} <ArrowRight size={28} />
+                       {currentQuestion === QUIZ_QUESTIONS.length - 1 ? 'ПЕРЕГЛЯНУТИ РЕЗУЛЬТАТ' : 'НАСТУПНЕ ПИТАННЯ'} <ArrowRight size={28} />
                     </button>
                  </motion.div>
                )}
@@ -700,12 +761,14 @@ export default function App() {
                         className={cn(
                           "p-10 text-left border-3 rounded-[2.5rem] font-bold text-xl transition-all relative group flex items-center min-h-[120px]",
                           selected === null ? "bg-gray-50 border-gray-50 hover:border-emerald-500 hover:bg-emerald-50 text-gray-600" : 
-                          i === selected ? (i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-2xl" : "bg-red-500 border-red-500 text-white") : "bg-gray-50 border-gray-50 opacity-10"
+                          i === question.correct ? "bg-emerald-500 border-emerald-500 text-white shadow-2xl z-10" :
+                          i === selected ? "bg-red-500 border-red-500 text-white z-10" : "bg-gray-50 border-gray-50 opacity-10"
                         )}
                       >
                          <span className="text-3xl font-black mr-8 opacity-20">{['A', 'B', 'C', 'D'][i]}</span>
                          <span className="flex-1">{opt}</span>
-                         {selected === i && i === question.correct && <CheckCircle2 className="text-white ml-4" size={32} />}
+                         {selected !== null && i === question.correct && <CheckCircle2 className="text-white ml-4 animate-bounce" size={32} />}
+                         {selected !== null && i === selected && i !== question.correct && <AlertCircle className="text-white ml-4" size={32} />}
                       </button>
                     ))}
                   </div>
